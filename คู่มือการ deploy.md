@@ -89,8 +89,10 @@
 4.  ตั้งค่าบริการดังนี้:
     *   **Root Directory**: `backend`
     *   **Runtime**: `Node`
-    *   **Build Command**: `npm install && npx prisma generate && npm run build`
+    *   **Build Command**: `npm install && npx prisma generate && npx prisma db push && npm run build`
     *   **Start Command**: `npm start`
+    
+    > **หมายเหตุสำคัญ**: คำสั่ง `npx prisma db push` จะสร้างตารางในฐานข้อมูล Supabase ให้อัตโนมัติตาม schema ที่กำหนดไว้
 5.  ไปที่แท็บ **Environment** เพิ่มตัวแปร:
     *   `DATABASE_URL`: วาง URL จาก Supabase
     *   `PORT`: `3000`
