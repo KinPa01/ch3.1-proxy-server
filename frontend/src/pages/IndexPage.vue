@@ -28,6 +28,63 @@
         </q-banner>
       </div>
 
+      <!-- ฟอร์มเพิ่มข้อมูลนักศึกษา -->
+      <q-card flat bordered class="q-mb-lg" style="border-radius: 12px;">
+        <q-card-section class="bg-primary text-white">
+          <div class="text-h6">
+            <q-icon name="person_add" class="q-mr-sm" />
+            เพิ่มข้อมูลนักศึกษา
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="studentName"
+                outlined
+                label="ชื่อ-นามสกุล"
+                placeholder="เช่น ภาคิน อินแถลง"
+                :disable="submitting"
+                @keyup.enter="addStudent"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="person" />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model="studentId"
+                outlined
+                label="รหัสนักศึกษา"
+                placeholder="เช่น 6604101365"
+                :disable="submitting"
+                @keyup.enter="addStudent"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="badge" />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="col-12 col-md-3 flex items-center">
+              <q-btn
+                unelevated
+                color="primary"
+                label="เพิ่มข้อมูล"
+                icon="add"
+                class="full-width"
+                :loading="submitting"
+                :disable="!studentName || !studentId"
+                @click="addStudent"
+              />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+
       <div class="row q-col-gutter-md">
         <div v-if="loading" class="col-12 flex justify-center q-pa-xl">
           <q-spinner-dots color="primary" size="3em" />
@@ -86,11 +143,19 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { api } from 'boot/axios';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 const tasks = ref([]);
 const loading = ref(false);
 const errorMessage = ref('');
 const loadingErrorUrl = ref('');
+
+// ตัวแปรสำหรับฟอร์มเพิ่มข้อมูล
+const studentName = ref('');
+const studentId = ref('');
+const submitting = ref(false);
 
 const fetchTasks = async () => {
   loading.value = true;
@@ -106,6 +171,52 @@ const fetchTasks = async () => {
     loadingErrorUrl.value = api.defaults.baseURL + '/tasks';
   } finally {
     loading.value = false;
+  }
+};
+
+const addStudent = async () => {
+  // ตรวจสอบข้อมูล
+  if (!studentName.value || !studentId.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณากรอกชื่อและรหัสนักศึกษา',
+      position: 'top',
+    });
+    return;
+  }
+
+  submitting.value = true;
+
+  try {
+    const res = await api.post('/tasks', {
+      title: studentName.value,
+      description: studentId.value,
+    });
+
+    // แสดงข้อความสำเร็จ
+    $q.notify({
+      type: 'positive',
+      message: `เพิ่มข้อมูล ${studentName.value} สำเร็จ!`,
+      position: 'top',
+      icon: 'check_circle',
+    });
+
+    // ล้างฟอร์ม
+    studentName.value = '';
+    studentId.value = '';
+
+    // รีเฟรชรายการ
+    await fetchTasks();
+  } catch (err) {
+    console.error('Add Student Error:', err);
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถเพิ่มข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+      position: 'top',
+      icon: 'error',
+    });
+  } finally {
+    submitting.value = false;
   }
 };
 
