@@ -24,6 +24,10 @@ async function main() {
             title: 'Cloud Deployment',
             description: 'Deploy Backend to Render and Frontend to Netlify',
         },
+        {
+            title: 'ภาคิน อินแถลง',
+            description: '6604101365',
+        },
     ];
 
     for (const t of initialTasks) {
